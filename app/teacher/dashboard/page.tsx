@@ -8,6 +8,7 @@ import { fetchClasses, submitAbsenceReport } from '@/lib/api';
 import { addAbsenceDirectly } from '@/lib/firestore';
 import { ClassInfo, StudentAbsentee } from '@/lib/types';
 import Footer from '@/components/layout/Footer';
+import ThemeToggle from '@/components/ui/ThemeToggle';
 
 export default function TeacherDashboardPage() {
   return (
@@ -186,13 +187,27 @@ function TeacherDashboardContent() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <header className="header">
-        <div className="header-title">
-          <i className="fas fa-chalkboard-teacher"></i> Teacher Dashboard
+      <header className="header" role="banner">
+        <div className="header-title" aria-label="Teacher Dashboard" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'rgba(139, 92, 246, 0.15)', color: '#8b5cf6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem' }}>
+            <i className="fas fa-chalkboard-teacher"></i>
+          </div>
+          <div>
+            <div style={{ fontWeight: 700, fontSize: '1.15rem', color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
+              Teacher Portal
+            </div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 500 }}>
+              Classroom Roll-Call &amp; Absence Submission
+            </div>
+          </div>
         </div>
-        <button onClick={handleLogout} className="btn btn-accent" aria-label="Logout">
-          <i className="fas fa-sign-out-alt"></i> Logout
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <ThemeToggle />
+          <button onClick={handleLogout} className="btn-logout" aria-label="Logout">
+            <i className="fas fa-sign-out-alt"></i>
+            <span>Logout</span>
+          </button>
+        </div>
       </header>
 
       <main className="container" style={{ margin: '24px auto' }}>

@@ -1,25 +1,19 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { loginWithEmail, logoutUser, setLocalUserRole, clearLocalUserRole, determineUserRole } from '@/lib/auth';
-import { getDivisionsForSupervisor } from '@/lib/firestore';
 import { useAuth } from '@/components/auth/AuthContext';
+import ThemeToggle from '@/components/ui/ThemeToggle';
 
 export default function SupervisorLoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { refreshRole } = useAuth();
-
-  useEffect(() => {
-    document.documentElement.setAttribute('data-scheme', 'fluent');
-    return () => {
-      document.documentElement.removeAttribute('data-scheme');
-    };
-  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,95 +54,135 @@ export default function SupervisorLoginPage() {
   };
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        minHeight: '100vh',
-        margin: 0,
-        backgroundColor: 'var(--background-color)',
-      }}
-    >
-      <div className="login-box">
-        <h2>
-          <i className="fas fa-user-tie"></i> Supervisor Login
-        </h2>
-        <form onSubmit={handleLogin}>
-          <div className="input-group">
-            <i className="fas fa-envelope"></i>
-            <input
-              type="email"
-              id="email"
-              placeholder="Official Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
+    <div className="login-page-wrapper">
+      {/* Ambient role glow */}
+      <div className="login-glow-orb login-glow-supervisor" aria-hidden="true"></div>
+
+      {/* Top Bar with Back and Theme Switcher */}
+      <nav className="login-top-bar">
+        <Link href="/" className="login-back-nav">
+          <i className="fas fa-arrow-left"></i>
+          <span>Return to Portal</span>
+        </Link>
+        <ThemeToggle />
+      </nav>
+
+      {/* Login Card */}
+      <div className="login-card login-role-supervisor">
+        <div className="login-card-header">
+          <div className="login-role-icon">
+            <i className="fas fa-user-shield"></i>
           </div>
-          <div className="input-group">
-            <i className="fas fa-lock"></i>
-            <input
-              type="password"
-              id="password"
-              placeholder="Secure Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+          <h2>Supervisor Portal</h2>
+          <p>Access live division attendance feeds and student rosters</p>
+        </div>
+
+        <form onSubmit={handleLogin} className="login-form">
+          <div className="login-field">
+            <label htmlFor="email">Supervisor Email</label>
+            <div className="login-input-wrap">
+              <i className="fas fa-envelope field-icon"></i>
+              <input
+                type="email"
+                id="email"
+                placeholder="supervisor@school.edu"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                autoComplete="email"
+              />
+            </div>
           </div>
-          <button type="submit" disabled={loading}>
-            {loading ? 'Logging in...' : 'Login Securely'}
+
+          <div className="login-field">
+            <label htmlFor="password">Account Password</label>
+            <div className="login-input-wrap">
+              <i className="fas fa-lock field-icon"></i>
+              <input
+                type={showPassword ? 'text' : 'password'}
+                id="password"
+                placeholder="••••••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                autoComplete="current-password"
+              />
+              <button
+                type="button"
+                className="toggle-pwd"
+                onClick={() => setShowPassword(!showPassword)}
+                title={showPassword ? 'Hide password' : 'Show password'}
+                aria-label="Toggle password visibility"
+              >
+                <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+              </button>
+            </div>
+          </div>
+
+          <button type="submit" disabled={loading} className="login-btn-submit">
+            {loading ? (
+              <>
+                <i className="fas fa-circle-notch fa-spin"></i>
+                <span>Entering Dashboard...</span>
+              </>
+            ) : (
+              <>
+                <i className="fas fa-arrow-right-to-bracket"></i>
+                <span>Sign In to Division Hub</span>
+              </>
+            )}
           </button>
         </form>
 
-        {/* Division Account Quick Selectors */}
-        <div style={{ marginTop: '20px', textAlign: 'left', borderTop: '1px solid #e5e7eb', paddingTop: '14px' }}>
-          <div style={{ fontSize: '12px', fontWeight: 600, color: '#6b7280', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-            Select Division Account:
+        {/* Division Quick Fill Helper */}
+        <div className="division-quick-picker">
+          <div className="division-picker-title">
+            <i className="fas fa-layer-group"></i>
+            <span>Quick-Select Division Account:</span>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
+          <div className="division-grid">
             <button
               type="button"
               onClick={() => handleQuickFill('supervisor.secondary@test.com')}
-              style={{ padding: '7px 8px', fontSize: '11px', fontWeight: 600, background: '#eef2ff', color: '#4338ca', border: '1px solid #c7d2fe', borderRadius: '6px', cursor: 'pointer', textAlign: 'center' }}
+              className="division-pill-btn"
             >
-              🎓 Secondary
+              <span>🎓</span>
+              <span>Secondary</span>
             </button>
             <button
               type="button"
               onClick={() => handleQuickFill('supervisor.elementary@test.com')}
-              style={{ padding: '7px 8px', fontSize: '11px', fontWeight: 600, background: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0', borderRadius: '6px', cursor: 'pointer', textAlign: 'center' }}
+              className="division-pill-btn"
             >
-              🌱 Elementary
+              <span>🌱</span>
+              <span>Elementary</span>
             </button>
             <button
               type="button"
               onClick={() => handleQuickFill('supervisor.middle@test.com')}
-              style={{ padding: '7px 8px', fontSize: '11px', fontWeight: 600, background: '#fffbeb', color: '#b45309', border: '1px solid #fde68a', borderRadius: '6px', cursor: 'pointer', textAlign: 'center' }}
+              className="division-pill-btn"
             >
-              📚 Middle School
+              <span>📚</span>
+              <span>Middle School</span>
             </button>
             <button
               type="button"
               onClick={() => handleQuickFill('supervisor.technical@test.com')}
-              style={{ padding: '7px 8px', fontSize: '11px', fontWeight: 600, background: '#fdf2f8', color: '#be185d', border: '1px solid #fbcfe8', borderRadius: '6px', cursor: 'pointer', textAlign: 'center' }}
+              className="division-pill-btn"
             >
-              ⚙️ Technical
+              <span>⚙️</span>
+              <span>Technical</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleQuickFill('supervisor@test.com')}
+              className="division-pill-btn division-pill-all"
+            >
+              <span>🌐</span>
+              <span>All Divisions (Global Scope)</span>
             </button>
           </div>
-          <button
-            type="button"
-            onClick={() => handleQuickFill('supervisor@test.com')}
-            style={{ width: '100%', marginTop: '6px', padding: '6px 8px', fontSize: '11px', fontWeight: 500, background: '#f9fafb', color: '#4b5563', border: '1px solid #e5e7eb', borderRadius: '6px', cursor: 'pointer' }}
-          >
-            🌐 All Divisions (General Supervisor)
-          </button>
         </div>
-
-        <Link href="/" className="back-link">
-          Back to Portal
-        </Link>
       </div>
     </div>
   );

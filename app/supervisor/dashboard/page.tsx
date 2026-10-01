@@ -10,6 +10,7 @@ import { AbsenceRecord, AggregatedAbsence } from '@/lib/types';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import EmptyState from '@/components/ui/EmptyState';
 import Footer from '@/components/layout/Footer';
+import ThemeToggle from '@/components/ui/ThemeToggle';
 
 export default function SupervisorDashboardPage() {
   return (
@@ -242,36 +243,41 @@ function SupervisorDashboardContent() {
         Skip to content
       </a>
 
-      {/* Header */}
+      {/* Modern Glass Header */}
       <header className="header" role="banner">
-        <div className="header-title" aria-label="Supervisor Dashboard">
-          <i className="fas fa-user-shield"></i>
-          <span>Supervisor Dashboard</span>
+        <div className="header-title" aria-label="Supervisor Dashboard" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'rgba(2, 132, 199, 0.15)', color: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem' }}>
+            <i className="fas fa-user-shield"></i>
+          </div>
+          <div>
+            <div style={{ fontWeight: 700, fontSize: '1.15rem', color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
+              Supervisor Dashboard
+            </div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 500 }}>
+              Live Division Attendance Monitoring
+            </div>
+          </div>
         </div>
-        <nav className="toolbar" aria-label="Header actions">
-          <button
-            onClick={toggleTheme}
-            className="btn btn-accent"
-            title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-            aria-label="Toggle theme"
-          >
-            <i className={`fas ${theme === 'dark' ? 'fa-sun' : 'fa-moon'}`}></i>
-          </button>
+        <nav className="toolbar" aria-label="Header actions" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <ThemeToggle />
           <button
             onClick={handleExportCSV}
-            className="btn btn-accent"
+            className="btn btn-primary"
             title="Export reports as CSV"
             aria-label="Export CSV"
+            style={{ padding: '8px 14px', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
           >
-            <i className="fas fa-file-csv"></i> Export CSV
+            <i className="fas fa-file-csv"></i>
+            <span>Export CSV</span>
           </button>
           <button
             onClick={handleLogout}
-            className="btn btn-accent"
+            className="btn-logout"
             title="Logout"
             aria-label="Logout"
           >
             <i className="fas fa-sign-out-alt"></i>
+            <span>Logout</span>
           </button>
         </nav>
       </header>

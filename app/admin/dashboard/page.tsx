@@ -17,6 +17,7 @@ import { createManagedUser, sendPasswordReset } from '@/lib/auth';
 import { fetchClasses, addClass, deleteClass, syncClasses, archiveDailyReports } from '@/lib/api';
 import { Principal, Teacher, ClassInfo, AbsenceRecord } from '@/lib/types';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import ThemeToggle from '@/components/ui/ThemeToggle';
 
 export default function AdminDashboardPage() {
   return (
@@ -939,13 +940,26 @@ function AdminDashboardContent() {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <header className="header" style={{ backgroundColor: '#22c55e' }}>
-        <div className="header-title">
-          <i className="fas fa-user-shield"></i> Admin Dashboard
+      <header className="header" role="banner">
+        <div className="header-title" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem' }}>
+            <i className="fas fa-sliders"></i>
+          </div>
+          <div>
+            <div style={{ fontWeight: 700, fontSize: '1.15rem', color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
+              Admin Dashboard
+            </div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 500 }}>
+              Executive Control &amp; Analytics Hub
+            </div>
+          </div>
         </div>
-        <button onClick={handleLogout} className="btn-logout" aria-label="Logout">
-          <i className="fas fa-sign-out-alt"></i> Logout
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <ThemeToggle />
+          <button onClick={handleLogout} className="btn-logout" aria-label="Logout">
+            <i className="fas fa-sign-out-alt"></i> Logout
+          </button>
+        </div>
       </header>
 
       <main className="container" style={{ margin: '24px auto' }}>

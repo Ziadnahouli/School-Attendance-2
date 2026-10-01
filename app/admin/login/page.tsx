@@ -5,10 +5,12 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { loginWithEmail, logoutUser, setLocalUserRole, clearLocalUserRole, determineUserRole } from '@/lib/auth';
 import { useAuth } from '@/components/auth/AuthContext';
+import ThemeToggle from '@/components/ui/ThemeToggle';
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { refreshRole } = useAuth();
@@ -47,63 +49,85 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        minHeight: '100vh',
-        margin: 0,
-        backgroundColor: '#f1f2f6',
-      }}
-    >
-      <div
-        className="login-box"
-        style={{
-          borderTop: '5px solid #c0392b',
-        }}
-      >
-        <h2 style={{ color: '#2c3e50' }}>
-          <i className="fas fa-user-shield" style={{ color: '#c0392b' }}></i> Admin Login
-        </h2>
-        <form onSubmit={handleLogin}>
-          <div className="input-group">
-            <i className="fas fa-envelope"></i>
-            <input
-              type="email"
-              id="email"
-              placeholder="Admin Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
+    <div className="login-page-wrapper">
+      {/* Ambient role glow */}
+      <div className="login-glow-orb login-glow-admin" aria-hidden="true"></div>
+
+      {/* Top Bar with Back and Theme Switcher */}
+      <nav className="login-top-bar">
+        <Link href="/" className="login-back-nav">
+          <i className="fas fa-arrow-left"></i>
+          <span>Return to Portal</span>
+        </Link>
+        <ThemeToggle />
+      </nav>
+
+      {/* Login Card */}
+      <div className="login-card login-role-admin">
+        <div className="login-card-header">
+          <div className="login-role-icon">
+            <i className="fas fa-user-shield"></i>
           </div>
-          <div className="input-group">
-            <i className="fas fa-lock"></i>
-            <input
-              type="password"
-              id="password"
-              placeholder="Admin Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+          <h2>Executive Admin</h2>
+          <p>Sign in to manage classes, users, and campus analytics</p>
+        </div>
+
+        <form onSubmit={handleLogin} className="login-form">
+          <div className="login-field">
+            <label htmlFor="email">Administrator Email</label>
+            <div className="login-input-wrap">
+              <i className="fas fa-envelope field-icon"></i>
+              <input
+                type="email"
+                id="email"
+                placeholder="admin@school.edu"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                autoComplete="email"
+              />
+            </div>
           </div>
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              backgroundColor: '#c0392b',
-              cursor: loading ? 'not-allowed' : 'pointer',
-              opacity: loading ? 0.7 : 1,
-            }}
-          >
-            {loading ? 'Logging in...' : 'Login Securely'}
+
+          <div className="login-field">
+            <label htmlFor="password">Secure Password</label>
+            <div className="login-input-wrap">
+              <i className="fas fa-lock field-icon"></i>
+              <input
+                type={showPassword ? 'text' : 'password'}
+                id="password"
+                placeholder="••••••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                autoComplete="current-password"
+              />
+              <button
+                type="button"
+                className="toggle-pwd"
+                onClick={() => setShowPassword(!showPassword)}
+                title={showPassword ? 'Hide password' : 'Show password'}
+                aria-label="Toggle password visibility"
+              >
+                <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+              </button>
+            </div>
+          </div>
+
+          <button type="submit" disabled={loading} className="login-btn-submit">
+            {loading ? (
+              <>
+                <i className="fas fa-circle-notch fa-spin"></i>
+                <span>Authenticating...</span>
+              </>
+            ) : (
+              <>
+                <i className="fas fa-shield-halved"></i>
+                <span>Authenticate Securely</span>
+              </>
+            )}
           </button>
         </form>
-        <Link href="/" className="back-link">
-          Back to Portal
-        </Link>
       </div>
     </div>
   );
