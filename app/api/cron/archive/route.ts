@@ -4,8 +4,6 @@ import {
   getFirestore,
   collection,
   getDocs,
-  query,
-  where,
   writeBatch,
   serverTimestamp,
 } from 'firebase/firestore';
@@ -28,7 +26,7 @@ function getDbInstance() {
   return { app, db: getFirestore(app) };
 }
 
-async function performArchiving(archiveAllActive = false): Promise<number> {
+async function performArchiving(): Promise<number> {
   const { app, db } = getDbInstance();
 
   const auth = getAuth(app);
@@ -54,23 +52,20 @@ async function performArchiving(archiveAllActive = false): Promise<number> {
 
   snap.docs.forEach((docSnap) => {
     const data = docSnap.data();
-    const isArchived = data.status === 'archived';
-    if (isArchived) return;
+    // Only archive reports that are not already archived
+    if (data.status === 'archived') return;
 
     let docDateStr = data.date;
     if (!docDateStr && data.timestamp?.toDate) {
       docDateStr = data.timestamp.toDate().toISOString().split('T')[0];
     }
 
-    // Archive if manual trigger (archiveAllActive) OR if report date is older than today
-    if (archiveAllActive || (docDateStr && docDateStr < todayStr)) {
-      batch.update(docSnap.ref, {
-        status: 'archived',
-        archivedAt: serverTimestamp(),
-        archiveDate: docDateStr || todayStr,
-      });
-      count++;
-    }
+    batch.update(docSnap.ref, {
+      status: 'archived',
+      archivedAt: serverTimestamp(),
+      archiveDate: docDateStr || todayStr,
+    });
+    count++;
   });
 
   if (count > 0) {
@@ -80,19 +75,19 @@ async function performArchiving(archiveAllActive = false): Promise<number> {
   return count;
 }
 
-// Vercel Cron handler (GET)
+// Vercel Cron handler (GET) - runs automatically at midnight or when "Run" is clicked in Vercel
 export async function GET(req: NextRequest) {
   try {
-    const forceAll = req.nextUrl.searchParams.get('all') === 'true';
-    const archivedCount = await performArchiving(forceAll);
+    const archivedCount = await performArchiving();
     return NextResponse.json({
       success: true,
-      message: `Archived ${archivedCount} daily absence report(s).`,
+      message: `Daily reset completed: Archived ${archivedCount} active absence report(s). Today's live dashboard feed is now cleared.`,
       count: archivedCount,
       timestamp: new Date().toISOString(),
     });
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : 'Archiving failed';
+    console.error('Cron archiving error:', msg);
     return NextResponse.json({ success: false, error: msg }, { status: 500 });
   }
 }
@@ -100,9 +95,7 @@ export async function GET(req: NextRequest) {
 // Manual trigger handler from Admin Panel (POST)
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json().catch(() => ({}));
-    const forceAll = body?.all !== false; // Default manual archive archives all active
-    const archivedCount = await performArchiving(forceAll);
+    const archivedCount = await performArchiving();
     return NextResponse.json({
       success: true,
       message: `Successfully archived ${archivedCount} report(s). Today's supervisor feed is now refreshed.`,
@@ -111,6 +104,7 @@ export async function POST(req: NextRequest) {
     });
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : 'Archiving failed';
+    console.error('Manual archiving error:', msg);
     return NextResponse.json({ success: false, error: msg }, { status: 500 });
   }
 }
