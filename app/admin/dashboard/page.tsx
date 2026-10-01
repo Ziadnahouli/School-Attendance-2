@@ -10,6 +10,7 @@ import {
   updatePrincipalDivisions,
   deleteUserDoc,
   fetchArchivedAbsences,
+  fetchAllAbsences,
   archiveAllActiveAbsences,
 } from '@/lib/firestore';
 import { createManagedUser, sendPasswordReset } from '@/lib/auth';
@@ -73,6 +74,12 @@ function AdminDashboardContent() {
   const [archiveSearch, setArchiveSearch] = useState('');
   const [expandedArchiveId, setExpandedArchiveId] = useState<string | null>(null);
 
+  // Statistical Intelligence Hub state
+  const [allRecords, setAllRecords] = useState<AbsenceRecord[]>([]);
+  const [statsTimeframe, setStatsTimeframe] = useState<'all' | 'today' | 'week' | 'month'>('all');
+  const [statsDivision, setStatsDivision] = useState('All');
+  const [statsActiveTab, setStatsActiveTab] = useState<'divisions' | 'classes' | 'students' | 'sessions' | 'subjects'>('divisions');
+
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', 'admin');
     return () => {
@@ -131,10 +138,14 @@ function AdminDashboardContent() {
   const loadArchivedData = async () => {
     setLoadingArchive(true);
     try {
-      const data = await fetchArchivedAbsences();
-      setArchivedReports(data);
+      const [archived, all] = await Promise.all([
+        fetchArchivedAbsences(),
+        fetchAllAbsences(),
+      ]);
+      setArchivedReports(archived);
+      setAllRecords(all);
     } catch (err) {
-      console.error('Failed to load archived reports:', err);
+      console.error('Failed to load archived/all reports:', err);
     } finally {
       setLoadingArchive(false);
     }
@@ -221,6 +232,300 @@ function AdminDashboardContent() {
       return acc + (r.students && r.students.length > 0 ? r.students.length : 1);
     }, 0);
   }, [filteredArchivedReports]);
+
+  // ==========================================
+  // STATISTICAL INTELLIGENCE & ANALYTICS HOOKS
+  // ==========================================
+
+  // Filtered dataset for statistics based on timeframe and division
+  const statsFilteredReports = useMemo(() => {
+    const todayStr = new Date().toDateString();
+    const now = Date.now();
+    return allRecords.filter((r) => {
+      // Division filter
+      if (statsDivision !== 'All') {
+        if ((r.division || '').toLowerCase() !== statsDivision.toLowerCase()) {
+          return false;
+        }
+      }
+
+      // Timeframe filter
+      if (statsTimeframe === 'today') {
+        return r.timestamp.toDateString() === todayStr;
+      }
+      if (statsTimeframe === 'week') {
+        return now - r.timestamp.getTime() <= 7 * 24 * 60 * 60 * 1000;
+      }
+      if (statsTimeframe === 'month') {
+        return now - r.timestamp.getTime() <= 30 * 24 * 60 * 60 * 1000;
+      }
+      return true;
+    });
+  }, [allRecords, statsDivision, statsTimeframe]);
+
+  // Overall KPI metrics
+  const statsMetrics = useMemo(() => {
+    let unexcusedCount = 0;
+    let excusedCount = 0;
+    let lateCount = 0;
+    let totalStudentIncidents = 0;
+
+    statsFilteredReports.forEach((r) => {
+      if (r.students && r.students.length > 0) {
+        r.students.forEach((s) => {
+          totalStudentIncidents++;
+          const st = (s.status || '').toLowerCase();
+          if (st.includes('excused')) excusedCount++;
+          else if (st.includes('late')) lateCount++;
+          else unexcusedCount++;
+        });
+      } else {
+        totalStudentIncidents++;
+        const st = (r.attendanceStatus || '').toLowerCase();
+        if (st.includes('excused')) excusedCount++;
+        else if (st.includes('late')) lateCount++;
+        else unexcusedCount++;
+      }
+    });
+
+    const unexcusedPct = totalStudentIncidents > 0 ? Math.round((unexcusedCount / totalStudentIncidents) * 100) : 0;
+    const excusedPct = totalStudentIncidents > 0 ? Math.round((excusedCount / totalStudentIncidents) * 100) : 0;
+    const latePct = totalStudentIncidents > 0 ? Math.round((lateCount / totalStudentIncidents) * 100) : 0;
+
+    // Active today count
+    const todayDateStr = new Date().toDateString();
+    const activeTodayReports = allRecords.filter((r) => r.timestamp.toDateString() === todayDateStr && r.status !== 'archived');
+    const totalArchivedReports = allRecords.filter((r) => r.status === 'archived' || r.timestamp.toDateString() !== todayDateStr);
+
+    return {
+      totalReports: statsFilteredReports.length,
+      totalStudentIncidents,
+      unexcusedCount,
+      excusedCount,
+      lateCount,
+      unexcusedPct,
+      excusedPct,
+      latePct,
+      activeTodayCount: activeTodayReports.length,
+      archivedTotalCount: totalArchivedReports.length,
+    };
+  }, [statsFilteredReports, allRecords]);
+
+  // Division-by-division breakdown
+  const divisionBreakdown = useMemo(() => {
+    const map = new Map<string, { reports: number; students: number; unexcused: number; excused: number; late: number }>();
+
+    availableDivisions.forEach((d) => {
+      map.set(d, { reports: 0, students: 0, unexcused: 0, excused: 0, late: 0 });
+    });
+
+    statsFilteredReports.forEach((r) => {
+      const divName = r.division || 'Unassigned';
+      if (!map.has(divName)) {
+        map.set(divName, { reports: 0, students: 0, unexcused: 0, excused: 0, late: 0 });
+      }
+      const entry = map.get(divName)!;
+      entry.reports++;
+
+      if (r.students && r.students.length > 0) {
+        r.students.forEach((s) => {
+          entry.students++;
+          const st = (s.status || '').toLowerCase();
+          if (st.includes('excused')) entry.excused++;
+          else if (st.includes('late')) entry.late++;
+          else entry.unexcused++;
+        });
+      } else {
+        entry.students++;
+        const st = (r.attendanceStatus || '').toLowerCase();
+        if (st.includes('excused')) entry.excused++;
+        else if (st.includes('late')) entry.late++;
+        else entry.unexcused++;
+      }
+    });
+
+    const totalStudents = statsMetrics.totalStudentIncidents || 1;
+    return Array.from(map.entries())
+      .map(([division, data]) => ({
+        division,
+        ...data,
+        percentage: Math.round((data.students / totalStudents) * 100),
+      }))
+      .sort((a, b) => b.students - a.students);
+  }, [statsFilteredReports, availableDivisions, statsMetrics.totalStudentIncidents]);
+
+  // Top affected classes leaderboard
+  const topAffectedClasses = useMemo(() => {
+    const map = new Map<string, { className: string; section: string; division: string; totalAbsences: number; unexcused: number; late: number; excused: number }>();
+
+    statsFilteredReports.forEach((r) => {
+      const key = `${r.division}::${r.class}::${r.section}`;
+      if (!map.has(key)) {
+        map.set(key, {
+          className: r.class,
+          section: r.section,
+          division: r.division,
+          totalAbsences: 0,
+          unexcused: 0,
+          late: 0,
+          excused: 0,
+        });
+      }
+      const item = map.get(key)!;
+      const count = r.students && r.students.length > 0 ? r.students.length : 1;
+      item.totalAbsences += count;
+
+      if (r.students && r.students.length > 0) {
+        r.students.forEach((s) => {
+          const st = (s.status || '').toLowerCase();
+          if (st.includes('excused')) item.excused++;
+          else if (st.includes('late')) item.late++;
+          else item.unexcused++;
+        });
+      } else {
+        const st = (r.attendanceStatus || '').toLowerCase();
+        if (st.includes('excused')) item.excused++;
+        else if (st.includes('late')) item.late++;
+        else item.unexcused++;
+      }
+    });
+
+    return Array.from(map.values())
+      .sort((a, b) => b.totalAbsences - a.totalAbsences)
+      .slice(0, 8);
+  }, [statsFilteredReports]);
+
+  // Repeat absentee students watchlist (chronic absenteeism / at-risk)
+  const repeatAbsenteeStudents = useMemo(() => {
+    const studentMap = new Map<string, {
+      name: string;
+      total: number;
+      unexcused: number;
+      late: number;
+      excused: number;
+      divisions: Set<string>;
+      classes: Set<string>;
+      reasons: Set<string>;
+      lastSeen: Date;
+    }>();
+
+    statsFilteredReports.forEach((r) => {
+      if (r.students && r.students.length > 0) {
+        r.students.forEach((s) => {
+          const rawName = s.name.trim();
+          if (!rawName) return;
+          const key = rawName.toLowerCase();
+          if (!studentMap.has(key)) {
+            studentMap.set(key, {
+              name: rawName,
+              total: 0,
+              unexcused: 0,
+              late: 0,
+              excused: 0,
+              divisions: new Set(),
+              classes: new Set(),
+              reasons: new Set(),
+              lastSeen: r.timestamp,
+            });
+          }
+          const item = studentMap.get(key)!;
+          item.total++;
+          if (r.division) item.divisions.add(r.division);
+          if (r.class) item.classes.add(`${r.class} (${r.section})`);
+          if (s.reason) item.reasons.add(s.reason);
+          else if (r.reason) item.reasons.add(r.reason);
+
+          const st = (s.status || '').toLowerCase();
+          if (st.includes('excused')) item.excused++;
+          else if (st.includes('late')) item.late++;
+          else item.unexcused++;
+
+          if (r.timestamp > item.lastSeen) item.lastSeen = r.timestamp;
+        });
+      }
+    });
+
+    return Array.from(studentMap.values())
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 10);
+  }, [statsFilteredReports]);
+
+  // Hourly session / period distribution
+  const sessionPeriodStats = useMemo(() => {
+    const sessionMap = new Map<string, number>();
+    for (let i = 1; i <= 8; i++) {
+      sessionMap.set(String(i), 0);
+    }
+
+    statsFilteredReports.forEach((r) => {
+      const sess = String(r.session || '1');
+      const count = r.students && r.students.length > 0 ? r.students.length : 1;
+      sessionMap.set(sess, (sessionMap.get(sess) || 0) + count);
+    });
+
+    const totalStudents = statsMetrics.totalStudentIncidents || 1;
+    let maxSession = '1';
+    let maxCount = 0;
+
+    const list = Array.from(sessionMap.entries())
+      .map(([session, count]) => {
+        if (count > maxCount) {
+          maxCount = count;
+          maxSession = session;
+        }
+        return {
+          session,
+          count,
+          percentage: Math.round((count / totalStudents) * 100),
+        };
+      })
+      .sort((a, b) => Number(a.session) - Number(b.session));
+
+    return { list, peakSession: maxSession, peakCount: maxCount };
+  }, [statsFilteredReports, statsMetrics.totalStudentIncidents]);
+
+  // Most reported subjects
+  const subjectReportingStats = useMemo(() => {
+    const map = new Map<string, number>();
+    statsFilteredReports.forEach((r) => {
+      const subj = (r.subject || '').trim();
+      if (!subj || subj.toLowerCase() === 'n/a') return;
+      map.set(subj, (map.get(subj) || 0) + 1);
+    });
+    return Array.from(map.entries())
+      .map(([subject, count]) => ({ subject, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 6);
+  }, [statsFilteredReports]);
+
+  // Common absence reasons
+  const commonReasonsStats = useMemo(() => {
+    const map = new Map<string, number>();
+    statsFilteredReports.forEach((r) => {
+      if (r.students && r.students.length > 0) {
+        r.students.forEach((s) => {
+          const reason = (s.reason || r.reason || '').trim();
+          if (!reason) {
+            map.set('No Reason Provided', (map.get('No Reason Provided') || 0) + 1);
+          } else {
+            map.set(reason, (map.get(reason) || 0) + 1);
+          }
+        });
+      } else {
+        const reason = (r.reason || '').trim();
+        if (!reason) {
+          map.set('No Reason Provided', (map.get('No Reason Provided') || 0) + 1);
+        } else {
+          map.set(reason, (map.get(reason) || 0) + 1);
+        }
+      }
+    });
+
+    return Array.from(map.entries())
+      .map(([reason, count]) => ({ reason, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 8);
+  }, [statsFilteredReports]);
 
   const handleExportArchivedCSV = () => {
     if (filteredArchivedReports.length === 0) {
@@ -648,6 +953,815 @@ function AdminDashboardContent() {
           <LoadingSpinner message="Loading dashboard users..." />
         ) : (
           <div className="dashboard" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '24px' }}>
+            {/* ========================================================= */}
+            {/* EXECUTIVE ATTENDANCE ANALYTICS & STATISTICAL INTELLIGENCE */}
+            {/* ========================================================= */}
+            <div
+              className="management-card"
+              style={{
+                gridColumn: '1 / -1',
+                padding: '24px',
+                background: '#ffffff',
+                borderRadius: '12px',
+                border: '1px solid #e2e8f0',
+                boxShadow: '0 4px 16px rgba(0, 0, 0, 0.04)',
+              }}
+            >
+              {/* Analytics Header & Control Bar */}
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                  gap: '16px',
+                  borderBottom: '1px solid #e5e7eb',
+                  paddingBottom: '18px',
+                }}
+              >
+                <div>
+                  <h2
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                      margin: 0,
+                      fontSize: '1.35rem',
+                      fontWeight: 700,
+                      color: '#0f172a',
+                    }}
+                  >
+                    <i className="fas fa-chart-line" style={{ color: '#2563eb' }}></i>
+                    School Attendance Analytics & Statistical Intelligence
+                    <span
+                      style={{
+                        fontSize: '11px',
+                        fontWeight: 700,
+                        padding: '3px 8px',
+                        borderRadius: '12px',
+                        backgroundColor: '#dcfce7',
+                        color: '#15803d',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.4px',
+                      }}
+                    >
+                      Live Realtime
+                    </span>
+                  </h2>
+                  <span style={{ fontSize: '13px', color: '#64748b' }}>
+                    Executive overview of student attendance rates, unexcused vs excused metrics, division comparisons, and at-risk monitoring.
+                  </span>
+                </div>
+
+                {/* Timeframe & Division Filters */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                  {/* Timeframe Pills */}
+                  <div
+                    style={{
+                      display: 'flex',
+                      backgroundColor: '#f1f5f9',
+                      padding: '3px',
+                      borderRadius: '8px',
+                      gap: '2px',
+                    }}
+                  >
+                    {(
+                      [
+                        { id: 'all', label: 'All Time' },
+                        { id: 'today', label: 'Today' },
+                        { id: 'week', label: 'Last 7 Days' },
+                        { id: 'month', label: 'This Month' },
+                      ] as const
+                    ).map((t) => {
+                      const isActive = statsTimeframe === t.id;
+                      return (
+                        <button
+                          key={t.id}
+                          type="button"
+                          onClick={() => setStatsTimeframe(t.id)}
+                          style={{
+                            padding: '6px 12px',
+                            borderRadius: '6px',
+                            border: 'none',
+                            fontSize: '12px',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            backgroundColor: isActive ? '#ffffff' : 'transparent',
+                            color: isActive ? '#0f172a' : '#64748b',
+                            boxShadow: isActive ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                            transition: 'all 0.15s ease',
+                          }}
+                        >
+                          {t.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Division Select */}
+                  <select
+                    value={statsDivision}
+                    onChange={(e) => setStatsDivision(e.target.value)}
+                    style={{
+                      padding: '7px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid #cbd5e1',
+                      fontSize: '12px',
+                      fontWeight: 600,
+                      color: '#1e293b',
+                      backgroundColor: '#ffffff',
+                      outline: 'none',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <option value="All">All Divisions</option>
+                    {availableDivisions.map((div) => (
+                      <option key={div} value={div}>
+                        {div}
+                      </option>
+                    ))}
+                  </select>
+
+                  <button
+                    type="button"
+                    onClick={loadArchivedData}
+                    disabled={loadingArchive}
+                    title="Reload attendance data"
+                    style={{
+                      backgroundColor: '#f8fafc',
+                      color: '#334155',
+                      border: '1px solid #cbd5e1',
+                      padding: '7px 12px',
+                      borderRadius: '8px',
+                      fontSize: '12px',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                    }}
+                  >
+                    <i className={`fas fa-sync-alt ${loadingArchive ? 'fa-spin' : ''}`} style={{ color: '#2563eb' }}></i>
+                    Sync
+                  </button>
+                </div>
+              </div>
+
+              {/* Top 4 Primary KPI Cards */}
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                  gap: '16px',
+                  marginTop: '20px',
+                  marginBottom: '20px',
+                }}
+              >
+                {/* Metric 1: Total Incidents */}
+                <div
+                  style={{
+                    backgroundColor: '#f8fafc',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '10px',
+                    padding: '16px 18px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                      <span style={{ fontSize: '12px', fontWeight: 600, color: '#64748b' }}>
+                        Total Absences & Tardiness
+                      </span>
+                      <div style={{ fontSize: '2rem', fontWeight: 800, color: '#0f172a', margin: '4px 0' }}>
+                        {statsMetrics.totalStudentIncidents}
+                      </div>
+                    </div>
+                    <div
+                      style={{
+                        width: '38px',
+                        height: '38px',
+                        borderRadius: '8px',
+                        backgroundColor: '#e0f2fe',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#0284c7',
+                        fontSize: '16px',
+                      }}
+                    >
+                      <i className="fas fa-users-slash"></i>
+                    </div>
+                  </div>
+                  <div style={{ fontSize: '11px', color: '#64748b', marginTop: '6px', display: 'flex', justifyContent: 'space-between' }}>
+                    <span>Reports: <b>{statsMetrics.totalReports}</b></span>
+                    <span style={{ color: '#0284c7', fontWeight: 600 }}>Active Today: {statsMetrics.activeTodayCount}</span>
+                  </div>
+                </div>
+
+                {/* Metric 2: Unexcused Absences */}
+                <div
+                  style={{
+                    backgroundColor: '#fef2f2',
+                    border: '1px solid #fecaca',
+                    borderRadius: '10px',
+                    padding: '16px 18px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                      <span style={{ fontSize: '12px', fontWeight: 600, color: '#991b1b' }}>
+                        Unexcused Absences
+                      </span>
+                      <div style={{ fontSize: '2rem', fontWeight: 800, color: '#dc2626', margin: '4px 0' }}>
+                        {statsMetrics.unexcusedCount}
+                      </div>
+                    </div>
+                    <div
+                      style={{
+                        width: '38px',
+                        height: '38px',
+                        borderRadius: '8px',
+                        backgroundColor: '#fee2e2',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#dc2626',
+                        fontSize: '16px',
+                      }}
+                    >
+                      <i className="fas fa-exclamation-triangle"></i>
+                    </div>
+                  </div>
+                  <div style={{ fontSize: '11px', color: '#b91c1c', marginTop: '6px', fontWeight: 600 }}>
+                    {statsMetrics.unexcusedPct}% of total incidents (Needs follow-up)
+                  </div>
+                </div>
+
+                {/* Metric 3: Excused Absences */}
+                <div
+                  style={{
+                    backgroundColor: '#f0fdf4',
+                    border: '1px solid #bbf7d0',
+                    borderRadius: '10px',
+                    padding: '16px 18px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                      <span style={{ fontSize: '12px', fontWeight: 600, color: '#166534' }}>
+                        Excused Absences
+                      </span>
+                      <div style={{ fontSize: '2rem', fontWeight: 800, color: '#16a34a', margin: '4px 0' }}>
+                        {statsMetrics.excusedCount}
+                      </div>
+                    </div>
+                    <div
+                      style={{
+                        width: '38px',
+                        height: '38px',
+                        borderRadius: '8px',
+                        backgroundColor: '#dcfce7',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#16a34a',
+                        fontSize: '16px',
+                      }}
+                    >
+                      <i className="fas fa-check-circle"></i>
+                    </div>
+                  </div>
+                  <div style={{ fontSize: '11px', color: '#15803d', marginTop: '6px', fontWeight: 600 }}>
+                    {statsMetrics.excusedPct}% documented / authorized
+                  </div>
+                </div>
+
+                {/* Metric 4: Late Arrivals */}
+                <div
+                  style={{
+                    backgroundColor: '#fffbeb',
+                    border: '1px solid #fde68a',
+                    borderRadius: '10px',
+                    padding: '16px 18px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                      <span style={{ fontSize: '12px', fontWeight: 600, color: '#92400e' }}>
+                        Late Arrivals (Tardy)
+                      </span>
+                      <div style={{ fontSize: '2rem', fontWeight: 800, color: '#d97706', margin: '4px 0' }}>
+                        {statsMetrics.lateCount}
+                      </div>
+                    </div>
+                    <div
+                      style={{
+                        width: '38px',
+                        height: '38px',
+                        borderRadius: '8px',
+                        backgroundColor: '#fef3c7',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#d97706',
+                        fontSize: '16px',
+                      }}
+                    >
+                      <i className="fas fa-clock"></i>
+                    </div>
+                  </div>
+                  <div style={{ fontSize: '11px', color: '#b45309', marginTop: '6px', fontWeight: 600 }}>
+                    {statsMetrics.latePct}% punctuality incidents
+                  </div>
+                </div>
+              </div>
+
+              {/* Multi-Color Segmented Proportion Bar */}
+              <div
+                style={{
+                  backgroundColor: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '10px',
+                  padding: '16px 20px',
+                  marginBottom: '22px',
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '12px', fontWeight: 700, color: '#334155' }}>
+                    Incident Distribution Ratio
+                  </span>
+                  <span style={{ fontSize: '11px', color: '#64748b' }}>
+                    {statsMetrics.totalStudentIncidents} Total Records
+                  </span>
+                </div>
+
+                {/* The Bar */}
+                <div
+                  style={{
+                    display: 'flex',
+                    height: '14px',
+                    borderRadius: '7px',
+                    overflow: 'hidden',
+                    backgroundColor: '#e2e8f0',
+                  }}
+                >
+                  {statsMetrics.totalStudentIncidents > 0 ? (
+                    <>
+                      <div
+                        style={{
+                          width: `${statsMetrics.unexcusedPct}%`,
+                          backgroundColor: '#ef4444',
+                          transition: 'width 0.3s ease',
+                        }}
+                        title={`Unexcused: ${statsMetrics.unexcusedCount} (${statsMetrics.unexcusedPct}%)`}
+                      />
+                      <div
+                        style={{
+                          width: `${statsMetrics.latePct}%`,
+                          backgroundColor: '#f59e0b',
+                          transition: 'width 0.3s ease',
+                        }}
+                        title={`Late: ${statsMetrics.lateCount} (${statsMetrics.latePct}%)`}
+                      />
+                      <div
+                        style={{
+                          width: `${statsMetrics.excusedPct}%`,
+                          backgroundColor: '#10b981',
+                          transition: 'width 0.3s ease',
+                        }}
+                        title={`Excused: ${statsMetrics.excusedCount} (${statsMetrics.excusedPct}%)`}
+                      />
+                    </>
+                  ) : (
+                    <div style={{ width: '100%', backgroundColor: '#cbd5e1' }} />
+                  )}
+                </div>
+
+                {/* Legends */}
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'flex-start',
+                    gap: '20px',
+                    marginTop: '10px',
+                    flexWrap: 'wrap',
+                    fontSize: '12px',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#ef4444' }} />
+                    <span style={{ color: '#475569' }}>
+                      Unexcused: <b>{statsMetrics.unexcusedCount}</b> ({statsMetrics.unexcusedPct}%)
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#f59e0b' }} />
+                    <span style={{ color: '#475569' }}>
+                      Late: <b>{statsMetrics.lateCount}</b> ({statsMetrics.latePct}%)
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#10b981' }} />
+                    <span style={{ color: '#475569' }}>
+                      Excused: <b>{statsMetrics.excusedCount}</b> ({statsMetrics.excusedPct}%)
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Sub-Tabs for In-Depth Analytics */}
+              <div
+                style={{
+                  display: 'flex',
+                  gap: '8px',
+                  borderBottom: '2px solid #e2e8f0',
+                  paddingBottom: '0',
+                  marginBottom: '18px',
+                  overflowX: 'auto',
+                }}
+              >
+                {(
+                  [
+                    { id: 'divisions', label: 'Divisions Breakdown', icon: 'fa-sitemap' },
+                    { id: 'classes', label: 'Top Affected Classes', icon: 'fa-trophy' },
+                    { id: 'students', label: 'At-Risk Watchlist', icon: 'fa-user-clock' },
+                    { id: 'sessions', label: 'Hourly Period Trends', icon: 'fa-history' },
+                    { id: 'subjects', label: 'Subjects & Reasons', icon: 'fa-book-open' },
+                  ] as const
+                ).map((tab) => {
+                  const isActive = statsActiveTab === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => setStatsActiveTab(tab.id)}
+                      style={{
+                        padding: '10px 16px',
+                        border: 'none',
+                        borderBottom: isActive ? '3px solid #2563eb' : '3px solid transparent',
+                        backgroundColor: 'transparent',
+                        color: isActive ? '#2563eb' : '#64748b',
+                        fontWeight: isActive ? 700 : 600,
+                        fontSize: '13px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        whiteSpace: 'nowrap',
+                        transition: 'all 0.15s ease',
+                      }}
+                    >
+                      <i className={`fas ${tab.icon}`}></i>
+                      {tab.label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* TAB 1: Divisions Breakdown */}
+              {statsActiveTab === 'divisions' && (
+                <div>
+                  <div
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                      gap: '14px',
+                    }}
+                  >
+                    {divisionBreakdown.map((div) => {
+                      const badge = getDivisionBadgeColor(div.division);
+                      return (
+                        <div
+                          key={div.division}
+                          style={{
+                            border: '1px solid #e2e8f0',
+                            borderRadius: '10px',
+                            padding: '16px',
+                            backgroundColor: '#ffffff',
+                            boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
+                          }}
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                            <span
+                              style={{
+                                fontSize: '12px',
+                                fontWeight: 700,
+                                padding: '3px 10px',
+                                borderRadius: '4px',
+                                backgroundColor: badge.bg,
+                                color: badge.text,
+                                border: `1px solid ${badge.border}`,
+                                textTransform: 'uppercase',
+                              }}
+                            >
+                              {div.division}
+                            </span>
+                            <span style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a' }}>
+                              {div.students} Incidents ({div.percentage}%)
+                            </span>
+                          </div>
+
+                          {/* Progress bar */}
+                          <div style={{ width: '100%', height: '8px', backgroundColor: '#f1f5f9', borderRadius: '4px', overflow: 'hidden', marginBottom: '12px' }}>
+                            <div
+                              style={{
+                                width: `${div.percentage}%`,
+                                height: '100%',
+                                backgroundColor: badge.text,
+                                borderRadius: '4px',
+                              }}
+                            />
+                          </div>
+
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px', textAlign: 'center', fontSize: '11px' }}>
+                            <div style={{ background: '#fef2f2', padding: '6px', borderRadius: '6px' }}>
+                              <span style={{ color: '#dc2626', fontWeight: 700, display: 'block', fontSize: '13px' }}>{div.unexcused}</span>
+                              <span style={{ color: '#991b1b' }}>Unexcused</span>
+                            </div>
+                            <div style={{ background: '#fffbeb', padding: '6px', borderRadius: '6px' }}>
+                              <span style={{ color: '#d97706', fontWeight: 700, display: 'block', fontSize: '13px' }}>{div.late}</span>
+                              <span style={{ color: '#92400e' }}>Late</span>
+                            </div>
+                            <div style={{ background: '#f0fdf4', padding: '6px', borderRadius: '6px' }}>
+                              <span style={{ color: '#16a34a', fontWeight: 700, display: 'block', fontSize: '13px' }}>{div.excused}</span>
+                              <span style={{ color: '#166534' }}>Excused</span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 2: Top Affected Classes Leaderboard */}
+              {statsActiveTab === 'classes' && (
+                <div>
+                  {topAffectedClasses.length === 0 ? (
+                    <div style={{ padding: '30px', textAlign: 'center', color: '#64748b' }}>
+                      No class attendance incidents recorded for this timeframe.
+                    </div>
+                  ) : (
+                    <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden' }}>
+                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', textAlign: 'left' }}>
+                        <thead>
+                          <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: '#475569', fontWeight: 600 }}>
+                            <th style={{ padding: '10px 14px', width: '60px' }}>Rank</th>
+                            <th style={{ padding: '10px 14px' }}>Class & Section</th>
+                            <th style={{ padding: '10px 14px' }}>Division</th>
+                            <th style={{ padding: '10px 14px' }}>Total Absences</th>
+                            <th style={{ padding: '10px 14px' }}>Unexcused</th>
+                            <th style={{ padding: '10px 14px' }}>Late</th>
+                            <th style={{ padding: '10px 14px' }}>Excused</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {topAffectedClasses.map((item, idx) => {
+                            const badge = getDivisionBadgeColor(item.division);
+                            const rankIcons = ['🥇 #1', '🥈 #2', '🥉 #3'];
+                            const rankDisplay = rankIcons[idx] || `#${idx + 1}`;
+                            return (
+                              <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9', backgroundColor: idx % 2 === 0 ? '#ffffff' : '#fbfcfe' }}>
+                                <td style={{ padding: '10px 14px', fontWeight: 700, color: idx < 3 ? '#b45309' : '#64748b' }}>
+                                  {rankDisplay}
+                                </td>
+                                <td style={{ padding: '10px 14px' }}>
+                                  <strong style={{ color: '#1e293b' }}>{item.className}</strong>
+                                  <span style={{ color: '#64748b', marginLeft: '6px' }}>({item.section})</span>
+                                </td>
+                                <td style={{ padding: '10px 14px' }}>
+                                  <span
+                                    style={{
+                                      fontSize: '11px',
+                                      fontWeight: 700,
+                                      padding: '2px 8px',
+                                      borderRadius: '4px',
+                                      backgroundColor: badge.bg,
+                                      color: badge.text,
+                                      border: `1px solid ${badge.border}`,
+                                    }}
+                                  >
+                                    {item.division}
+                                  </span>
+                                </td>
+                                <td style={{ padding: '10px 14px' }}>
+                                  <span style={{ fontWeight: 800, color: '#dc2626', fontSize: '14px' }}>
+                                    {item.totalAbsences}
+                                  </span>
+                                </td>
+                                <td style={{ padding: '10px 14px', color: '#dc2626', fontWeight: 600 }}>{item.unexcused}</td>
+                                <td style={{ padding: '10px 14px', color: '#d97706', fontWeight: 600 }}>{item.late}</td>
+                                <td style={{ padding: '10px 14px', color: '#16a34a', fontWeight: 600 }}>{item.excused}</td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* TAB 3: At-Risk Repeat Absentees Watchlist */}
+              {statsActiveTab === 'students' && (
+                <div>
+                  {repeatAbsenteeStudents.length === 0 ? (
+                    <div style={{ padding: '30px', textAlign: 'center', color: '#64748b' }}>
+                      No repeat absentee records identified in this timeframe.
+                    </div>
+                  ) : (
+                    <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden' }}>
+                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', textAlign: 'left' }}>
+                        <thead>
+                          <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: '#475569', fontWeight: 600 }}>
+                            <th style={{ padding: '10px 14px' }}>Student Name</th>
+                            <th style={{ padding: '10px 14px' }}>Severity Alert</th>
+                            <th style={{ padding: '10px 14px' }}>Total Incidents</th>
+                            <th style={{ padding: '10px 14px' }}>Class / Division</th>
+                            <th style={{ padding: '10px 14px' }}>Status Breakdown</th>
+                            <th style={{ padding: '10px 14px' }}>Primary Reasons</th>
+                            <th style={{ padding: '10px 14px' }}>Last Recorded</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {repeatAbsenteeStudents.map((st, sIdx) => {
+                            const isHigh = st.total >= 3;
+                            const isMed = st.total === 2;
+                            return (
+                              <tr key={sIdx} style={{ borderBottom: '1px solid #f1f5f9', backgroundColor: isHigh ? '#fff1f2' : isMed ? '#fffbeb' : '#ffffff' }}>
+                                <td style={{ padding: '10px 14px' }}>
+                                  <strong style={{ color: '#0f172a' }}>{st.name}</strong>
+                                </td>
+                                <td style={{ padding: '10px 14px' }}>
+                                  {isHigh ? (
+                                    <span style={{ background: '#fee2e2', color: '#991b1b', padding: '3px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 700 }}>
+                                      🚨 High Alert
+                                    </span>
+                                  ) : isMed ? (
+                                    <span style={{ background: '#fef3c7', color: '#92400e', padding: '3px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 700 }}>
+                                      ⚠️ Watchlist
+                                    </span>
+                                  ) : (
+                                    <span style={{ background: '#f1f5f9', color: '#475569', padding: '3px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 600 }}>
+                                      ℹ️ Monitored
+                                    </span>
+                                  )}
+                                </td>
+                                <td style={{ padding: '10px 14px' }}>
+                                  <span style={{ fontSize: '14px', fontWeight: 800, color: isHigh ? '#dc2626' : '#1e293b' }}>
+                                    {st.total} {st.total === 1 ? 'time' : 'times'}
+                                  </span>
+                                </td>
+                                <td style={{ padding: '10px 14px' }}>
+                                  <div style={{ color: '#334155', fontWeight: 600 }}>{Array.from(st.classes).join(', ') || 'N/A'}</div>
+                                  <div style={{ fontSize: '11px', color: '#64748b' }}>{Array.from(st.divisions).join(', ')}</div>
+                                </td>
+                                <td style={{ padding: '10px 14px' }}>
+                                  <span style={{ color: '#dc2626', fontWeight: 600 }}>{st.unexcused} Unex</span>,{' '}
+                                  <span style={{ color: '#d97706', fontWeight: 600 }}>{st.late} Late</span>,{' '}
+                                  <span style={{ color: '#16a34a', fontWeight: 600 }}>{st.excused} Exc</span>
+                                </td>
+                                <td style={{ padding: '10px 14px', color: '#475569', fontSize: '12px' }}>
+                                  {st.reasons.size > 0 ? Array.from(st.reasons).join('; ') : 'No reason recorded'}
+                                </td>
+                                <td style={{ padding: '10px 14px', fontSize: '12px', color: '#64748b', whiteSpace: 'nowrap' }}>
+                                  {st.lastSeen.toLocaleDateString()}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* TAB 4: Hourly Period / Session Trends */}
+              {statsActiveTab === 'sessions' && (
+                <div>
+                  <div
+                    style={{
+                      backgroundColor: '#eff6ff',
+                      border: '1px solid #bfdbfe',
+                      borderRadius: '8px',
+                      padding: '12px 16px',
+                      marginBottom: '16px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                    }}
+                  >
+                    <i className="fas fa-info-circle" style={{ color: '#2563eb', fontSize: '18px' }}></i>
+                    <span style={{ fontSize: '13px', color: '#1e40af' }}>
+                      <b>Peak Absenteeism Trend:</b> Period <b>{sessionPeriodStats.peakSession}</b> has the highest concentration of absences ({sessionPeriodStats.peakCount} incidents). Morning session tardiness is typical of school arrival delays.
+                    </span>
+                  </div>
+
+                  <div
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
+                      gap: '12px',
+                    }}
+                  >
+                    {sessionPeriodStats.list.map((sess) => {
+                      const isPeak = sess.session === sessionPeriodStats.peakSession && sess.count > 0;
+                      return (
+                        <div
+                          key={sess.session}
+                          style={{
+                            border: '1px solid',
+                            borderColor: isPeak ? '#f87171' : '#e2e8f0',
+                            backgroundColor: isPeak ? '#fff1f2' : '#ffffff',
+                            borderRadius: '10px',
+                            padding: '14px',
+                            textAlign: 'center',
+                            boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
+                          }}
+                        >
+                          <div style={{ fontSize: '12px', fontWeight: 600, color: '#64748b', marginBottom: '4px' }}>
+                            Period {sess.session}
+                          </div>
+                          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: isPeak ? '#dc2626' : '#0f172a' }}>
+                            {sess.count}
+                          </div>
+                          <div style={{ fontSize: '11px', color: isPeak ? '#991b1b' : '#64748b', marginTop: '4px' }}>
+                            {sess.percentage}% of total
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 5: Subjects & Reasons */}
+              {statsActiveTab === 'subjects' && (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '18px' }}>
+                  {/* Subjects Card */}
+                  <div style={{ border: '1px solid #e2e8f0', borderRadius: '10px', padding: '16px', backgroundColor: '#ffffff' }}>
+                    <h3 style={{ fontSize: '14px', fontWeight: 700, margin: '0 0 12px 0', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <i className="fas fa-book" style={{ color: '#2563eb' }}></i> Top Reported Subjects
+                    </h3>
+                    {subjectReportingStats.length === 0 ? (
+                      <div style={{ color: '#64748b', fontSize: '13px' }}>No subject data recorded.</div>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        {subjectReportingStats.map((sub, sIdx) => (
+                          <div key={sIdx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 10px', background: '#f8fafc', borderRadius: '6px' }}>
+                            <span style={{ fontWeight: 600, color: '#334155', fontSize: '13px' }}>{sub.subject}</span>
+                            <span style={{ fontWeight: 700, color: '#2563eb', fontSize: '13px' }}>{sub.count} reports</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Reasons Card */}
+                  <div style={{ border: '1px solid #e2e8f0', borderRadius: '10px', padding: '16px', backgroundColor: '#ffffff' }}>
+                    <h3 style={{ fontSize: '14px', fontWeight: 700, margin: '0 0 12px 0', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <i className="fas fa-comment-medical" style={{ color: '#10b981' }}></i> Common Absence Reasons
+                    </h3>
+                    {commonReasonsStats.length === 0 ? (
+                      <div style={{ color: '#64748b', fontSize: '13px' }}>No reason notes provided.</div>
+                    ) : (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                        {commonReasonsStats.map((r, rIdx) => (
+                          <span
+                            key={rIdx}
+                            style={{
+                              background: '#f1f5f9',
+                              border: '1px solid #cbd5e1',
+                              color: '#334155',
+                              padding: '5px 10px',
+                              borderRadius: '20px',
+                              fontSize: '12px',
+                              fontWeight: 500,
+                            }}
+                          >
+                            {r.reason}: <b>{r.count}</b>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* Manage Principals */}
             <div className="management-card">
               <div className="card-header">

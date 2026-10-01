@@ -470,6 +470,59 @@ export async function fetchArchivedAbsences(options?: {
   }
 }
 
+// Fetch all absences (both active and archived) for the Admin Panel statistics & analytics suite
+export async function fetchAllAbsences(): Promise<AbsenceRecord[]> {
+  try {
+    const absencesRef = collection(db, 'absences');
+    const snapshot = await getDocs(absencesRef);
+    if (snapshot.empty) return [];
+
+    const records: AbsenceRecord[] = snapshot.docs
+      .map((docSnap) => {
+        const data = docSnap.data();
+        let timestamp: Date;
+        if (data.timestamp instanceof Timestamp) {
+          timestamp = data.timestamp.toDate();
+        } else if (data.timestamp?.toDate) {
+          timestamp = data.timestamp.toDate();
+        } else if (data.timestamp) {
+          timestamp = new Date(data.timestamp);
+        } else {
+          timestamp = new Date();
+        }
+
+        const rawStudents = Array.isArray(data.students) ? data.students : [];
+        const students: StudentAbsentee[] = rawStudents.map((s: Record<string, unknown>) => ({
+          name: String(s.name || '').trim(),
+          status: String(s.status || data.attendanceStatus || 'Unexcused').trim(),
+          reason: String(s.reason || data.reason || '').trim(),
+        }));
+
+        return {
+          id: docSnap.id,
+          teacherName: data.teacherName || 'System Record',
+          subject: data.subject || 'N/A',
+          session: String(data.session ?? 'N/A'),
+          division: data.division || '',
+          class: data.class || '',
+          section: data.section || '',
+          absentees: data.absentees || '',
+          attendanceStatus: data.attendanceStatus || 'Unexcused',
+          reason: data.reason || '',
+          students,
+          status: data.status || 'active',
+          timestamp,
+        };
+      })
+      .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+
+    return records;
+  } catch (err) {
+    console.error('Failed to fetch all absences:', err);
+    return [];
+  }
+}
+
 // Archive all active absences directly in Firestore
 export async function archiveAllActiveAbsences(): Promise<number> {
   const snapshot = await getDocs(collection(db, 'absences'));
