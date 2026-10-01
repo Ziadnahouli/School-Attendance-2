@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
     }
 
     const todayStr = new Date().toISOString().split('T')[0];
-    const db = getDb();
+    const db = await getDb();
     const docRef = await addDoc(collection(db, 'absences'), {
       teacherName: teacherName || 'Teacher',
       subject: subject || 'N/A',
