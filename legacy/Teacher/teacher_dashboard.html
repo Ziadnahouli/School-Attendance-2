@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en" data-scheme="teacher">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="../css/theme.css">
+    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+</head>
+<body style="display:flex; flex-direction:column;">
+    <header class="header">
+        <div class="header-title"><i class="fas fa-chalkboard-teacher"></i> Teacher Dashboard</div>
+        <button onclick="logout()" class="btn btn-accent"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    </header>
+
+    <main class="container">
+        <div class="welcome-card">
+            <span>👋 Welcome back, <b id="teacherName">...</b></span>
+            <span>Today's Date: <b id="currentDate">...</b></span>
+        </div>
+
+        <form onsubmit="event.preventDefault(); submitAbsence();">
+            <div class="layout-teacher">
+                <div class="col-left">
+                    <div class="form-container">
+                        <h3><i class="fas fa-clipboard-list"></i> Submit Daily Absence Report</h3>
+						<!-- Inside the form-container in col-left, before "Add Absent Students" -->
+						<div class="form-group">
+						<label for="teacherFullName">Teacher Name:</label>
+						<input type="text" id="teacherFullName" class="input" placeholder="Teacher Name" required>
+						</div>
+						<div class="form-group">
+						<label for="subjectTaught">Subject:</label>
+						<input type="text" id="subjectTaught" class="input" placeholder="Subject" required>
+						</div>
+						<div class="form-group">
+    <label for="sessionNumber">Session Number:</label>
+    <select id="sessionNumber" class="input" required>
+        <option value="" disabled selected>-- Select Session --</option>
+        <option value="1">Session 1</option>
+        <option value="2">Session 2</option>
+        <option value="3">Session 3</option>
+        <option value="4">Session 4</option>
+        <option value="5">Session 5</option>
+        <option value="6">Session 6</option>
+        <option value="7">Session 7</option>
+        <option value="8">Session 8</option>
+    </select>
+</div>
+                        <div class="form-group">
+                            <label>Add Absent Students</label>
+                            <div class="input-with-icon" style="margin-top:8px; align-items: stretch; gap:8px;">
+                                <i class="fas fa-user-plus"></i>
+                                <input id="studentName" type="text" placeholder="Student name" aria-label="Student name" />
+                                <select id="studentStatus" aria-label="Student status" class="input" style="min-width:130px;">
+                                    <option value="Unexcused" selected>Unexcused</option>
+                                    <option value="Excused">Excused</option>
+                                    <option value="Late">Late</option>
+                                </select>
+                                <input id="studentReason" type="text" placeholder="Reason (optional)" aria-label="Student reason" />
+                                <button type="button" id="addStudentBtn" class="btn btn-accent"><i class="fas fa-plus"></i></button>
+                            </div>
+                            <div id="studentChips" class="chip-select" style="margin-top:8px;"></div>
+                        </div>
+                        
+                        <button type="submit" class="btn-submit"><i class="fas fa-paper-plane"></i> Submit Absence</button>
+                    </div>
+                </div>
+                <div class="col-right">
+                    <div class="form-container">
+                        <h3><i class="fas fa-sliders-h"></i> Select Class</h3>
+                        <div class="form-group">
+                            <label for="division">Select Division:</label>
+                            <select id="division" aria-label="Select division">
+                                <option value="" disabled selected>-- Loading Divisions --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="className">Class Name:</label>
+                            <select id="className" disabled aria-label="Select class name">
+                                <option value="">-- First Select a Division --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="section">Section:</label>
+                            <select id="section" disabled aria-label="Select section">
+                                <option value="">-- First Select a Class --</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-center">
+            <img src="../logo 1.png" alt="About Us" class="footer-logo-about" onclick="goAbout()" loading="lazy">
+            <img src="../logo 2.png" alt="RHTI Logo" class="footer-logo-rhti" loading="lazy">
+            <div class="footer-text">
+                <a href="#" onclick="goAbout()">About Us</a>
+                <span>© 2025 RHTI. All rights reserved.</span>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../js/teacher.js"></script>
+</body>
+</html>

@@ -1,0 +1,596 @@
+[
+  {
+    "id": "2zrdkUJPjzgqYSwhR3bB",
+    "division": "Intermediate",
+    "name": "AP6",
+    "section": "N/A"
+  },
+  {
+    "id": "cBpfCJtOqWU9KJYSaCrk",
+    "division": "Intermediate",
+    "name": "AP7",
+    "section": "N/A"
+  },
+  {
+    "id": "rImfsuCfsEs5YMnxXAYs",
+    "division": "Intermediate",
+    "name": "AP8",
+    "section": "N/A"
+  },
+  {
+    "id": "X5edm8yKLapWsKvuZ9ey",
+    "division": "Intermediate",
+    "name": "AP9",
+    "section": "N/A"
+  },
+  {
+    "id": "UqUAXPbZUNX8HkjJAVGq",
+    "division": "Elementary",
+    "name": "BE1",
+    "section": "C"
+  },
+  {
+    "id": "ZUxjZoWtNrhZ9j6AT0VJ",
+    "division": "Elementary",
+    "name": "BE1",
+    "section": "D"
+  },
+  {
+    "id": "qK8rymBaYooPiMbhSiXS",
+    "division": "Elementary",
+    "name": "BE1",
+    "section": "A"
+  },
+  {
+    "id": "slXckQaT3uLfHDgIQpXs",
+    "division": "Elementary",
+    "name": "BE1",
+    "section": "B"
+  },
+  {
+    "id": "9yO7g2auysu5snFlWnRG",
+    "division": "Elementary",
+    "name": "BE2",
+    "section": "B"
+  },
+  {
+    "id": "RB6BMJp9iLFXThpd3iLR",
+    "division": "Elementary",
+    "name": "BE2",
+    "section": "A"
+  },
+  {
+    "id": "k51XnbXSMArdMkJx5DrC",
+    "division": "Elementary",
+    "name": "BE2",
+    "section": "D"
+  },
+  {
+    "id": "ytDsxTqrHpMTi4Wgx71y",
+    "division": "Elementary",
+    "name": "BE2",
+    "section": "C"
+  },
+  {
+    "id": "7ln6HtVxNDc7ci6ktTmX",
+    "division": "Elementary",
+    "name": "BE3",
+    "section": "D"
+  },
+  {
+    "id": "DjFtjViKGM9Nxx1n88ll",
+    "division": "Elementary",
+    "name": "BE3",
+    "section": "C"
+  },
+  {
+    "id": "d3p1JrK4ZR9SWS6YayKh",
+    "division": "Elementary",
+    "name": "BE3",
+    "section": "A"
+  },
+  {
+    "id": "ndtyNeECSIUJckFLRVBb",
+    "division": "Elementary",
+    "name": "BE3",
+    "section": "B"
+  },
+  {
+    "id": "91St9cOYO3nXBRuiFqrU",
+    "division": "Elementary",
+    "name": "BE4",
+    "section": "B"
+  },
+  {
+    "id": "PVK9qxQwoDdCaqfDPhmK",
+    "division": "Elementary",
+    "name": "BE4",
+    "section": "A"
+  },
+  {
+    "id": "gzysReZlwnxUjEZuePoe",
+    "division": "Elementary",
+    "name": "BE4",
+    "section": "C"
+  },
+  {
+    "id": "l0r4h3W2eVurQvA2US2M",
+    "division": "Elementary",
+    "name": "BE4",
+    "section": "D"
+  },
+  {
+    "id": "CToCWgRQASFQ1cL5VFY1",
+    "division": "Elementary",
+    "name": "BE5",
+    "section": "C"
+  },
+  {
+    "id": "QIHfwRyqlX9YkvPsdzdO",
+    "division": "Elementary",
+    "name": "BE5",
+    "section": "A"
+  },
+  {
+    "id": "auQpzCSglA74f5JwWu8j",
+    "division": "Elementary",
+    "name": "BE5",
+    "section": "B"
+  },
+  {
+    "id": "po2zV0kycdsJAiAOLJwo",
+    "division": "Elementary",
+    "name": "BE5",
+    "section": "D"
+  },
+  {
+    "id": "Ej0Q9YVvj4DORDvEQ8N6",
+    "division": "Intermediate",
+    "name": "BE6",
+    "section": "B"
+  },
+  {
+    "id": "OoB6v9K0Vw8iPbYllYSM",
+    "division": "Intermediate",
+    "name": "BE6",
+    "section": "C"
+  },
+  {
+    "id": "lWzsDaZRy27YVPVYvsyB",
+    "division": "Intermediate",
+    "name": "BE6",
+    "section": "A"
+  },
+  {
+    "id": "UKR1WoBGT2K6wrOhuvmJ",
+    "division": "Intermediate",
+    "name": "BE7",
+    "section": "A"
+  },
+  {
+    "id": "hr8VPCTMM02XPgfDJy6I",
+    "division": "Intermediate",
+    "name": "BE7",
+    "section": "B"
+  },
+  {
+    "id": "mIloxOiDyqGKiYD7P3lr",
+    "division": "Intermediate",
+    "name": "BE7",
+    "section": "C"
+  },
+  {
+    "id": "FdkCRqt8JlDpQY1cCY8g",
+    "division": "Intermediate",
+    "name": "BE8",
+    "section": "B"
+  },
+  {
+    "id": "frcIzAKSy7AEzpuKTTiL",
+    "division": "Intermediate",
+    "name": "BE8",
+    "section": "A"
+  },
+  {
+    "id": "zPh8tJHGGs7pZifQHGqh",
+    "division": "Intermediate",
+    "name": "BE8",
+    "section": "C"
+  },
+  {
+    "id": "VMcBD56xZYoOVOvXlnfv",
+    "division": "Intermediate",
+    "name": "BE9",
+    "section": "B"
+  },
+  {
+    "id": "mhRlvkHgkzRcQZTAUAGm",
+    "division": "Intermediate",
+    "name": "BE9",
+    "section": "A"
+  },
+  {
+    "id": "rIWvr2klVa0eYBSUAET1",
+    "division": "Intermediate",
+    "name": "BE9",
+    "section": "C"
+  },
+  {
+    "id": "kbapYwU3WXGz1GidsKZe",
+    "division": "Technical Institute",
+    "name": "BT1-ID",
+    "section": "N/A"
+  },
+  {
+    "id": "vIWIxcsBfaRmzm14BG5g",
+    "division": "Technical Institute",
+    "name": "BT1-It",
+    "section": "N/A"
+  },
+  {
+    "id": "aMMhWBbSUzAr91N58uFD",
+    "division": "Technical Institute",
+    "name": "BT2-IT",
+    "section": "N/A"
+  },
+  {
+    "id": "0GGADTBnvHKJ0wxlywZ9",
+    "division": "Secondary",
+    "name": "DP1",
+    "section": "N/A"
+  },
+  {
+    "id": "giLzqoSGBMlarTHu0Tw2",
+    "division": "Secondary",
+    "name": "DP2",
+    "section": "N/A"
+  },
+  {
+    "id": "IyBwAdmpvKf9LU3xSjVL",
+    "division": "Elementary",
+    "name": "EB1",
+    "section": "A"
+  },
+  {
+    "id": "ckeVKAlzGtNK5Gec3oJr",
+    "division": "Elementary",
+    "name": "EB1",
+    "section": "B"
+  },
+  {
+    "id": "1NFX7FpjJNmWgdaQCPZI",
+    "division": "Elementary",
+    "name": "EB2",
+    "section": "A"
+  },
+  {
+    "id": "NXJBRdycdprAJNViUUSi",
+    "division": "Elementary",
+    "name": "EB2",
+    "section": "B"
+  },
+  {
+    "id": "HuqJUG6raCLhlT7Tzj5C",
+    "division": "Elementary",
+    "name": "EB3",
+    "section": "B"
+  },
+  {
+    "id": "UuAnYkXz5Hurl8AbfIPB",
+    "division": "Elementary",
+    "name": "EB3",
+    "section": "A"
+  },
+  {
+    "id": "VapJxuHaDLWzF7znXsUe",
+    "division": "Elementary",
+    "name": "EB4",
+    "section": "B"
+  },
+  {
+    "id": "vdPR5ElGwqxHTqgN1HJD",
+    "division": "Elementary",
+    "name": "EB4",
+    "section": "A"
+  },
+  {
+    "id": "Hrt3zkLXYHMBzXMtMvFi",
+    "division": "Elementary",
+    "name": "EB5",
+    "section": "A"
+  },
+  {
+    "id": "bDbvyA2OEjmYu5T5DGOn",
+    "division": "Elementary",
+    "name": "EB5",
+    "section": "B"
+  },
+  {
+    "id": "KHtJOA4V6upCNbRcAqV7",
+    "division": "Intermediate",
+    "name": "EB6",
+    "section": "B"
+  },
+  {
+    "id": "f9jeRqwUWfD8oFN91wl9",
+    "division": "Intermediate",
+    "name": "EB6",
+    "section": "A"
+  },
+  {
+    "id": "UUY6VxKWQ4HVSqBQdj8v",
+    "division": "Intermediate",
+    "name": "EB7",
+    "section": "B"
+  },
+  {
+    "id": "f9lKQNbOowlLG5XZS5Ln",
+    "division": "Intermediate",
+    "name": "EB7",
+    "section": "A"
+  },
+  {
+    "id": "cpZ9mRykXzW9fjyNeweA",
+    "division": "Intermediate",
+    "name": "EB8",
+    "section": "A"
+  },
+  {
+    "id": "es2bTgvGktTRyBUefPrv",
+    "division": "Intermediate",
+    "name": "EB8",
+    "section": "B"
+  },
+  {
+    "id": "YqYifsXA83LFC0zO0NFo",
+    "division": "Intermediate",
+    "name": "EB9",
+    "section": "B"
+  },
+  {
+    "id": "pfpirgUIPE8HcETLzW7k",
+    "division": "Intermediate",
+    "name": "EB9",
+    "section": "A"
+  },
+  {
+    "id": "ETSLLNfsmq1hz2fNFxrb",
+    "division": "Secondary",
+    "name": "ES1",
+    "section": "B"
+  },
+  {
+    "id": "uPJ3Ha2PZ4YpduGxkojX",
+    "division": "Secondary",
+    "name": "ES1",
+    "section": "A"
+  },
+  {
+    "id": "PShZAF5iOGjsVlwsFRSe",
+    "division": "Secondary",
+    "name": "ES2 -H",
+    "section": "N/A"
+  },
+  {
+    "id": "5tLklux6Tg7S3sCqptn8",
+    "division": "Secondary",
+    "name": "ES2 SC",
+    "section": "B"
+  },
+  {
+    "id": "h5LM2zOSRPd3swLpYSrm",
+    "division": "Secondary",
+    "name": "ES2 SC",
+    "section": "A"
+  },
+  {
+    "id": "ngi8MjdQMbnM16i6gKKs",
+    "division": "Secondary",
+    "name": "ES3-LH",
+    "section": "N/A"
+  },
+  {
+    "id": "WEEbDsFyY5wC1xEvP8Uw",
+    "division": "Secondary",
+    "name": "ES3-SE",
+    "section": "N/A"
+  },
+  {
+    "id": "yq8KOj9YqkfZZoyra6rD",
+    "division": "Secondary",
+    "name": "ES3-SG",
+    "section": "N/A"
+  },
+  {
+    "id": "nJPWkMOVaBVqnhgErX4j",
+    "division": "Secondary",
+    "name": "ES3-SV",
+    "section": "N/A"
+  },
+  {
+    "id": "xT5SPSERhR1qyPwJFGqK",
+    "division": "Preschool",
+    "name": "Grand Section",
+    "section": "A"
+  },
+  {
+    "id": "P4sL6EbIDfKugmaDzqm0",
+    "division": "Preschool",
+    "name": "KG1",
+    "section": "D"
+  },
+  {
+    "id": "V1flpgCScWy5BEJ1pHJG",
+    "division": "Preschool",
+    "name": "KG1",
+    "section": "A"
+  },
+  {
+    "id": "XOWIfHDjktU30382HyxN",
+    "division": "Preschool",
+    "name": "KG1",
+    "section": "C"
+  },
+  {
+    "id": "lFGckpljlGD0xzw46SbH",
+    "division": "Preschool",
+    "name": "KG1",
+    "section": "B"
+  },
+  {
+    "id": "BboATGJeIsSRL4SfFfSk",
+    "division": "Preschool",
+    "name": "KG2",
+    "section": "C"
+  },
+  {
+    "id": "NHa0zSVQFtofa44glItU",
+    "division": "Preschool",
+    "name": "KG2",
+    "section": "B"
+  },
+  {
+    "id": "ffszYQdZ0464G01SBDgm",
+    "division": "Preschool",
+    "name": "KG2",
+    "section": "D"
+  },
+  {
+    "id": "j0efUgu7CRm28ewygn7G",
+    "division": "Preschool",
+    "name": "KG2",
+    "section": "A"
+  },
+  {
+    "id": "7ZnfVBZIvhjv9imSl3fy",
+    "division": "Preschool",
+    "name": "KG3",
+    "section": "A"
+  },
+  {
+    "id": "MCZVrn6uQyEC7bNB1QXT",
+    "division": "Preschool",
+    "name": "KG3",
+    "section": "C"
+  },
+  {
+    "id": "OblH5Yh4bhcCBX8hHIUG",
+    "division": "Preschool",
+    "name": "KG3",
+    "section": "B"
+  },
+  {
+    "id": "QFH0di9GQq8ehtvFZkkf",
+    "division": "Preschool",
+    "name": "KG3",
+    "section": "D"
+  },
+  {
+    "id": "NZq1UX8GaDNeaMpWQNvw",
+    "division": "Preschool",
+    "name": "Moyenne Section",
+    "section": "A"
+  },
+  {
+    "id": "JMre4k21i0RGZhnwT1St",
+    "division": "Preschool",
+    "name": "Petite Section",
+    "section": "A"
+  },
+  {
+    "id": "aYqwuwJxZr2dCeXYoPFE",
+    "division": "Secondary",
+    "name": "Première Bac. Fr.",
+    "section": "N/A"
+  },
+  {
+    "id": "GW6PYQMnYtW87RpZuLfr",
+    "division": "Secondary",
+    "name": "SE1",
+    "section": "C"
+  },
+  {
+    "id": "pxFIAkwcDW14sm0ycD3Q",
+    "division": "Secondary",
+    "name": "SE1",
+    "section": "A"
+  },
+  {
+    "id": "veqw6jS7rbeEsXZlKfhH",
+    "division": "Secondary",
+    "name": "SE1",
+    "section": "B"
+  },
+  {
+    "id": "95jLNmwtnJLWSVB4XuZj",
+    "division": "Secondary",
+    "name": "SE2 Sc",
+    "section": "A"
+  },
+  {
+    "id": "d5tPRzNsKHvKmErEVr3j",
+    "division": "Secondary",
+    "name": "SE2 Sc",
+    "section": "B"
+  },
+  {
+    "id": "rWgEuc44zRs1e3JAnhN8",
+    "division": "Secondary",
+    "name": "SE2 Sc",
+    "section": "C"
+  },
+  {
+    "id": "hKbREMw4mOQpFqiXW7pb",
+    "division": "Secondary",
+    "name": "SE2-H",
+    "section": "N/A"
+  },
+  {
+    "id": "IpxKknJlvzAtykmu1kUR",
+    "division": "Secondary",
+    "name": "SE3-GS",
+    "section": "N/A"
+  },
+  {
+    "id": "ZmPbI6hDWaJYn1GUh5Bx",
+    "division": "Secondary",
+    "name": "SE3-LH",
+    "section": "N/A"
+  },
+  {
+    "id": "0ALB7sB9IgIxZrFKhANt",
+    "division": "Secondary",
+    "name": "SE3-LS",
+    "section": "N/A"
+  },
+  {
+    "id": "nIyOrltr5jcARRDGVsDb",
+    "division": "Secondary",
+    "name": "SE3-SE",
+    "section": "N/A"
+  },
+  {
+    "id": "FrvXcjIOnNdzXjCIUt2h",
+    "division": "Secondary",
+    "name": "Seconde Bac. Fr",
+    "section": "N/A"
+  },
+  {
+    "id": "FeaEYJ0oG1kOBVvSCTD4",
+    "division": "Secondary",
+    "name": "Terminale Bac. Fr",
+    "section": "N/A"
+  },
+  {
+    "id": "cls-1790798907509-gmzf",
+    "division": "Technical Institute",
+    "name": "BT3-IT",
+    "section": "N/A"
+  },
+  {
+    "id": "cls-1790798883588-3j0q",
+    "division": "Technical Institute",
+    "name": "BT2-ID",
+    "section": "N/A"
+  }
+]

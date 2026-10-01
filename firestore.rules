@@ -1,0 +1,30 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Absences: allow teachers to submit and supervisors to monitor in real-time
+    match /absences/{docId} {
+      allow read, write: if true;
+    }
+
+    // Classes: allow dynamic curriculum configuration
+    match /classes/{docId} {
+      allow read, write: if true;
+    }
+
+    // Archived absences: allow storing and exporting historical attendance
+    match /archived_absences/{docId} {
+      allow read, write: if true;
+    }
+
+    // Role collections
+    match /admins/{userId} {
+      allow read, write: if true;
+    }
+    match /principals/{userId} {
+      allow read, write: if true;
+    }
+    match /teachers/{userId} {
+      allow read, write: if true;
+    }
+  }
+}

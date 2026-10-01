@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supervisor Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="../css/theme.css?v=3">
+    <link rel="stylesheet" href="../css/base.css?v=3">
+    <link rel="stylesheet" href="../css/components.css?v=3">
+    <link rel="stylesheet" href="../css/dashboard.css?v=3">
+    <style>
+      .container { margin: 8px auto; padding: 0 8px; }
+      .action-bar { margin-bottom: 8px; }
+      .page-title { font-size: 1.25rem; }
+      .grid-auto { gap: 8px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+      .card-header { padding: 8px 12px; }
+      .card-body { padding: 12px; gap: 8px; }
+      .card-footer { padding: 8px 12px; }
+      .footer { padding: 8px 12px; }
+    </style>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+</head>
+<body style="display:flex; flex-direction:column;">
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="header" role="banner">
+        <div class="header-title" aria-label="Supervisor Dashboard">
+            <i class="fas fa-user-shield"></i> 
+            <span>Supervisor Dashboard</span>
+        </div>
+        <nav class="toolbar" aria-label="Header actions">
+            <button onclick="logout()" class="btn btn-accent" aria-label="Logout"><i class="fas fa-sign-out-alt"></i></button>
+        </nav>
+    </header>
+
+    <main id="main" class="container" role="main">
+        
+
+        <section class="content" aria-label="Data">
+            <div class="action-bar">
+                <h2 class="page-title">Absence Reports</h2>
+                <div class="view-toggle" role="tablist" aria-label="View selector">
+                    <button id="viewCards" class="active" role="tab" aria-selected="true">Cards</button>
+                    <button id="viewTable" role="tab" aria-selected="false">Table</button>
+                </div>
+                <button class="btn btn-accent" onclick="resetAbsencesAll()" aria-label="Reset all absences" title="Delete all reports"><i class="fas fa-trash"></i> Reset All</button>
+            </div>
+
+            
+
+            <div id="loading" class="loading" aria-live="polite" aria-busy="true"><div class="spinner"></div>Loading...</div>
+
+            <div id="cardsView" class="content-cards">
+                <div id="absenceList" class="grid-auto"></div>
+                <div id="empty-state-container" style="display: none;">
+                    <div class="empty-state"><i class="fas fa-bell-slash"></i><p>No active absence reports found for your divisions.</p></div>
+                </div>
+            </div>
+
+            <div id="tableView" class="content-table hidden">
+                <table id="reportsTable">
+    <thead>
+        <tr>
+            <th>Time</th>
+            <th>Teacher</th>
+            <th>Subject</th>
+			<th>Session</th>
+            <th>Division</th>
+            <th>Class</th>
+            <th>Section</th>
+            <th>Absentees</th>
+        </tr>
+    </thead>
+    <tbody id="reportsTableBody"></tbody>
+</table>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer" role="contentinfo">
+        <div class="footer-center">
+            <img src="../logo 1.png" alt="About Us" class="footer-logo-about" onclick="goAbout()" loading="lazy">
+            <img src="../logo 2.png" alt="RHTI Logo" class="footer-logo-rhti" loading="lazy">
+            <div class="footer-text">
+                <a href="#" onclick="goAbout()">About Us</a>
+                <span>© 2025 RHTI. All rights reserved.</span>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../js/supervisor.js?v=3"></script>
+    <script src="../js/ui.js"></script>
+    <script src="../js/main-supervisor.js"></script>
+</body>
+</html>
+
+
+
+
+
+
+
+

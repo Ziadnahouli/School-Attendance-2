@@ -1,0 +1,58 @@
+@import "./theme.css";
+@import "./base.css";
+@import "./components.css";
+@import "./dashboard.css";
+@import "./login.css";
+@import "./portal.css";
+@import "./about.css";
+
+/* App Router global refinements */
+html, body {
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Ensure next-js container doesn't disrupt flex/grid flow */
+#__next {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Toast/Alert notifications styling */
+.toast-notification {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  padding: 12px 20px;
+  background: #1f2937;
+  color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  animation: slideIn 0.3s ease;
+}
+
+.toast-notification.success {
+  background: #15803d;
+}
+
+.toast-notification.error {
+  background: #b91c1c;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

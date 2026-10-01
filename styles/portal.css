@@ -1,0 +1,89 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: var(--background-color);
+}
+.portal-container {
+    background-color: var(--card-background);
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    text-align: center;
+    width: 100%;
+    max-width: 400px;
+    border-top: 5px solid var(--primary-color);
+}
+.portal-container h1 {
+    color: var(--text-color);
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-weight: 700;
+    font-size: 1.75rem;
+}
+.portal-container p {
+    color: var(--secondary-text);
+    margin-bottom: 30px;
+}
+.button-group {
+    display: grid;
+    gap: 16px;
+}
+.portal-btn {
+    padding: 14px;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border: 1px solid transparent;
+}
+.portal-btn i {
+    font-size: 1.2em;
+}
+.supervisor-btn { 
+    background-color: var(--primary-color); 
+    border-color: var(--primary-color);
+}
+.supervisor-btn:hover { 
+    background-color: var(--primary-hover); 
+    transform: translateY(-2px); 
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.teacher-btn { 
+    background-color: transparent;
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+.teacher-btn:hover { 
+    background-color: rgba(46,125,50,0.08);
+    transform: translateY(-2px); 
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.logo-footer {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.footer-logo {
+    height: 45px;
+    width: auto;
+    opacity: 0.8;
+}
+.about-logo {
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+.about-logo:hover {
+    opacity: 1;
+}

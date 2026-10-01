@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" data-scheme="fluent">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supervisor Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/theme.css">
+    <link rel="stylesheet" href="../css/login.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+        const firebaseConfig = { apiKey: "AIzaSyBX3-pcg4gCUzHdPuRhP9BPTKbJr4zM2Mc", authDomain: "school-attendance-81385.firebaseapp.com", projectId: "school-attendance-81385", storageBucket: "school-attendance-81385.firebasestorage.app", messagingSenderId: "232756214397", appId: "1:232756214397:web:67de1961741864be744f14" };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        
+        window.loginSupervisor = async function() {
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            if (!email || !password) { alert("Enter email & password"); return; }
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                window.location.href = "supervisor_dashboard.html"; // Redirects to the correct dashboard
+            } catch (err) {
+                alert("Login failed: " + err.message);
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="login-box">
+        <h2><i class="fas fa-user-tie"></i> Supervisor Login</h2>
+        <div class="input-group">
+            <i class="fas fa-envelope"></i>
+            <input type="email" id="email" placeholder="Official Email">
+        </div>
+        <div class="input-group">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="password" placeholder="Secure Password">
+        </div>
+        <button onclick="loginSupervisor()">Login Securely</button>
+        <a href="../index.html" class="back-link">Back to Portal</a>
+    </div>
+</body>
+</html>

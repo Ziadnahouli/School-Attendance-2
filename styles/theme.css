@@ -1,0 +1,44 @@
+:root {
+    /* Primary: Green */
+    --primary-color: #22c55e;
+    --primary-hover: #16a34a;
+    /* Secondary/Accent: Yellow */
+    --accent-color: #facc15;
+    /* Background: Pure white */
+    --background-color: #ffffff;
+    --card-background: #ffffff;
+    --text-color: #1f2937;
+    --secondary-text: #6b7280;
+    --border-color: #e5e7eb;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+html[data-theme="dark"] {
+    --primary-color: #22c55e;
+    --primary-hover: #16a34a;
+    --accent-color: #facc15;
+    --background-color: #111827;
+    --card-background: #1f2937;
+    --text-color: #f3f4f6;
+    --secondary-text: #9ca3af;
+    --border-color: #374151;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+}
+
+html[data-scheme="teacher"] {
+    --background-color: #F7F8FA;
+    --card-background: #FFFFFF;
+    --text-color: #0F172A;
+    --secondary-text: #64748B;
+    --border-color: #E5E7EB;
+    --shadow: 0 4px 14px rgba(0,0,0,0.06);
+}
+
+html[data-scheme="fluent"] {
+    --background-color: #F5F5F5;
+    --card-background: #FFFFFF;
+    --text-color: #111827;
+    --secondary-text: #6B7280;
+    --border-color: #E6E6E6;
+    --shadow: 0 6px 18px rgba(0,0,0,0.08);
+}

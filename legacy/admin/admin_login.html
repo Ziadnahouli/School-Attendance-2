@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #c0392b; /* Authoritative Red */
+            --primary-hover: #e74c3c;
+            --background-color: #f1f2f6;
+            --card-background: #ffffff;
+            --text-color: #2c3e50;
+            --border-color: #dfe4ea;
+            --shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+        body { font-family: 'Roboto', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: var(--background-color); }
+        .login-box { background-color: var(--card-background); padding: 40px; border-radius: 12px; box-shadow: var(--shadow); text-align: center; width: 100%; max-width: 380px; border-top: 5px solid var(--primary-color); }
+        h2 { color: var(--text-color); margin-bottom: 30px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 1.5em; }
+        h2 i { color: var(--primary-color); }
+        .input-group { position: relative; margin-bottom: 20px; text-align: left; }
+        .input-group i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #a4b0be; }
+        input { width: 100%; box-sizing: border-box; padding: 14px 14px 14px 45px; border-radius: 8px; border: 1px solid var(--border-color); font-size: 16px; transition: all 0.3s ease; }
+        input:focus { border-color: var(--primary-color); outline: none; box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.2); }
+        button { width: 100%; padding: 14px; background: var(--primary-color); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; margin-top: 10px; transition: background-color 0.2s; }
+        button:hover { background-color: var(--primary-hover); }
+    </style>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+        const firebaseConfig = { apiKey: "AIzaSyBX3-pcg4gCUzHdPuRhP9BPTKbJr4zM2Mc", authDomain: "school-attendance-81385.firebaseapp.com", projectId: "school-attendance-81385", storageBucket: "school-attendance-81385.firebasestorage.app", messagingSenderId: "232756214397", appId: "1:232756214397:web:67de1961741864be744f14" };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        window.loginAdmin = async function() {
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            if (!email || !password) { alert("Please enter email and password."); return; }
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                // On successful login, redirect to the admin dashboard
+                window.location.href = "admin_dashboard.html";
+            } catch (err) {
+                alert("Admin login failed: " + err.message);
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="login-box">
+        <h2><i class="fas fa-user-shield"></i> Admin Login</h2>
+        <div class="input-group">
+            <i class="fas fa-envelope"></i>
+            <input type="email" id="email" placeholder="Admin Email">
+        </div>
+        <div class="input-group">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="password" placeholder="Admin Password">
+        </div>
+        <button onclick="loginAdmin()">Login Securely</button>
+    </div>
+</body>
+</html>
