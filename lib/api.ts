@@ -1,4 +1,5 @@
 import { ClassInfo, SubmissionPayload } from './types';
+import { addAbsenceDirectly } from './firestore';
 
 // Fallback school classes matching typical curriculum structure if Render server is unavailable
 export const DEFAULT_CLASSES: ClassInfo[] = [
@@ -90,18 +91,39 @@ export async function deleteClass(
 }
 
 export async function submitAbsenceReport(payload: SubmissionPayload): Promise<{ success: boolean; message?: string; id?: string }> {
-  const res = await fetch('/api/absences', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
+  try {
+    const res = await fetch('/api/absences', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
 
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    if (res.ok) {
+      return { success: true, message: data.message || 'Absence report submitted successfully!', id: data.id };
+    }
     throw new Error(data.error || data.message || `Submission failed with status ${res.status}`);
+  } catch (apiErr: unknown) {
+    console.warn('API route submission error, attempting direct Firestore write fallback...', apiErr);
+    try {
+      const docId = await addAbsenceDirectly({
+        teacherName: payload.teacherName,
+        subject: payload.subject,
+        session: String(payload.session),
+        division: payload.division,
+        class: payload.class,
+        section: payload.section,
+        absentees: payload.absentees,
+        students: payload.students || [],
+        attendanceStatus: payload.attendanceStatus,
+        reason: payload.reason,
+      });
+      return { success: true, message: 'Absence report submitted successfully!', id: docId };
+    } catch (directErr: unknown) {
+      const msg = directErr instanceof Error ? directErr.message : String(directErr);
+      throw new Error(msg);
+    }
   }
-
-  return { success: true, message: data.message || 'Absence report submitted successfully!', id: data.id };
 }
 
 export async function archiveDailyReports(all = false): Promise<{ success: boolean; message: string; count: number }> {

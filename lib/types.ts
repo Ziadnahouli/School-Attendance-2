@@ -77,4 +77,5 @@ export interface SubmissionPayload {
   absentees: string;
   students: StudentAbsentee[];
   attendanceStatus?: string;
+  reason?: string;
 }
