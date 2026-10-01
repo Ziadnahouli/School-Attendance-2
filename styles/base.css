@@ -339,3 +339,91 @@ textarea:focus {
   border-color: var(--primary-color);
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
 }
+
+/* Dashboard Footer & Logos */
+.dashboard-footer,
+.footer {
+  margin-top: auto;
+  border-top: 1px solid var(--border-light);
+  background: var(--surface-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 16px 24px;
+}
+
+.footer-content,
+.footer-center {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1440px;
+  margin: 0 auto;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.footer-brand-logos {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Constrain all footer logos strictly across all pages */
+.dashboard-footer-logo,
+.footer-logo-about,
+.footer-logo-rhti,
+.footer-logo {
+  height: 36px !important;
+  max-height: 36px !important;
+  width: auto !important;
+  max-width: 120px !important;
+  object-fit: contain !important;
+  display: inline-block !important;
+  opacity: 0.85;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.dashboard-footer-logo:hover,
+.footer-logo-about:hover,
+.footer-logo-rhti:hover,
+.footer-logo:hover {
+  opacity: 1;
+  transform: scale(1.05);
+}
+
+.footer-info,
+.footer-text {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.footer-about-link,
+.footer-text a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.15s ease;
+}
+
+.footer-about-link:hover,
+.footer-text a:hover {
+  color: var(--color-brand-primary);
+}
+
+.footer-divider {
+  color: var(--border-strong);
+}
+
+/* Visually hide any skip-link by default */
+.skip-link {
+  position: absolute !important;
+  left: -9999px !important;
+  top: -9999px !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+}
+

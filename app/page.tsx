@@ -119,39 +119,6 @@ export default function HomePage() {
                 <i className="fas fa-arrow-right"></i>
               </div>
             </Link>
-
-            {/* Administrator Card */}
-            <Link href="/admin/login" className="portal-card role-admin" id="role-card-admin">
-              <div>
-                <div className="portal-card-header">
-                  <div className="portal-card-icon">
-                    <i className="fas fa-sliders"></i>
-                  </div>
-                  <span className="portal-role-tag">Executive</span>
-                </div>
-                <div className="portal-card-body">
-                  <h3>Executive Admin Suite</h3>
-                  <p>
-                    Comprehensive attendance analytics, automated daily archival, user permissions, and one-click PDF/CSV reports.
-                  </p>
-                  <div className="portal-feature-pills">
-                    <span className="portal-pill">
-                      <i className="fas fa-chart-pie"></i> Visual Analytics
-                    </span>
-                    <span className="portal-pill">
-                      <i className="fas fa-box-archive"></i> Daily Archive
-                    </span>
-                    <span className="portal-pill">
-                      <i className="fas fa-file-export"></i> PDF &amp; CSV Exports
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div className="portal-cta-btn">
-                <span>Access Admin Suite</span>
-                <i className="fas fa-arrow-right"></i>
-              </div>
-            </Link>
           </div>
         </section>
       </main>

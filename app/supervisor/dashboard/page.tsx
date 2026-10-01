@@ -239,10 +239,6 @@ function SupervisorDashboardContent() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <a className="skip-link" href="#main">
-        Skip to content
-      </a>
-
       {/* Modern Glass Header */}
       <header className="header" role="banner">
         <div className="header-title" aria-label="Supervisor Dashboard" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>

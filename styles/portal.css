@@ -202,11 +202,11 @@
   margin: 0 auto;
 }
 
-/* Role Selection Grid */
+/* Role Selection Grid (2-Role Layout: Teacher & Supervisor) */
 .portal-roles-container {
   position: relative;
   z-index: 10;
-  max-width: 1180px;
+  max-width: 960px;
   margin: 0 auto 3.5rem;
   padding: 0 1.5rem;
   width: 100%;
@@ -214,8 +214,9 @@
 
 .portal-roles-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.75rem;
+  grid-template-columns: repeat(2, minmax(320px, 440px));
+  justify-content: center;
+  gap: 2rem;
 }
 
 /* Individual Role Card */
